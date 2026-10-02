@@ -26,6 +26,8 @@ dist-ssr
 # Miscellaneous
 CLAUDE.md
 test/
+.claude/
+.agents/
 
 # Environment variables
 .env.development
