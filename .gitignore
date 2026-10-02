@@ -28,6 +28,7 @@ CLAUDE.md
 test/
 .claude/
 .agents/
+skills-lock.json
 
 # Environment variables
 .env.development
