@@ -90,10 +90,23 @@ export function ReviewSession() {
 // Keeps useKeybindings scoped to the active review screen only, so it isn't
 // registered during loading/empty/complete states above.
 function ReviewSessionActive({ card, note, showAnswer, setShowAnswer, handleRate }) {
+  const onShowAnswer = () => setShowAnswer(true);
+
   useKeybindings({
-    onShowAnswer: () => setShowAnswer(true),
+    onShowAnswer,
     onRate: handleRate,
   });
 
-  return <ReviewCard note={note} qfmt={card.qfmt} afmt={card.afmt} showAnswer={showAnswer} />;
+  // Passing the same onShowAnswer/handleRate used for keybindings down to ReviewCard's
+  // on-screen buttons, so a click and the matching keypress trigger the exact same handler.
+  return (
+    <ReviewCard
+      note={note}
+      qfmt={card.qfmt}
+      afmt={card.afmt}
+      showAnswer={showAnswer}
+      onShowAnswer={onShowAnswer}
+      onRate={handleRate}
+    />
+  );
 }

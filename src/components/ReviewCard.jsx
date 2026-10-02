@@ -19,16 +19,34 @@ function renderTemplate(template, fields, frontSideHtml) {
   });
 }
 
-export function ReviewCard({ note, qfmt, afmt, showAnswer }) {
+// On-screen buttons call the exact same onShowAnswer/onRate handlers useKeybindings wires up
+// to the keyboard (see ReviewSession.jsx) — so clicking a button and pressing the matching key
+// do the same thing. That's what lets this work on a touchscreen as well as a keyboard/clicker.
+export function ReviewCard({ note, qfmt, afmt, showAnswer, onShowAnswer, onRate }) {
   const front = renderTemplate(qfmt, note.fields);
 
   // Anki templates are hand-authored HTML (fonts, colors, layout), so they need to be rendered
   // as HTML rather than plain text. This is safe for a trusted personal import (your friend's
   // own deck), but worth knowing: any HTML/script embedded in an .apkg would run as-is.
   if (!showAnswer) {
-    return <div dangerouslySetInnerHTML={{ __html: front }} />;
+    return (
+      <div>
+        <div dangerouslySetInnerHTML={{ __html: front }} />
+        <button onClick={onShowAnswer}>Show Answer (Space)</button>
+      </div>
+    );
   }
 
   const answer = renderTemplate(afmt, note.fields, front);
-  return <div dangerouslySetInnerHTML={{ __html: answer }} />;
+  return (
+    <div>
+      <div dangerouslySetInnerHTML={{ __html: answer }} />
+      <div>
+        <button onClick={() => onRate('again')}>Again (1)</button>
+        <button onClick={() => onRate('hard')}>Hard (2)</button>
+        <button onClick={() => onRate('good')}>Good (3)</button>
+        <button onClick={() => onRate('easy')}>Easy (4)</button>
+      </div>
+    </div>
+  );
 }
