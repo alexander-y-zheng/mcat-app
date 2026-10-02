@@ -26,10 +26,18 @@ function SignInForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
+    <main className="auth-page">
+      <div className="brand auth-brand">
+        <span className="brand-mark" aria-hidden="true">M</span>
+        <span className="brand-name">MCAT Review</span>
+      </div>
+      <section className="auth-panel">
+        <p className="eyebrow">WELCOME BACK</p>
+        <h1>Your study desk<br />is ready.</h1>
+        <p className="auth-copy">Sign in to pick up where you left off.</p>
+        <form className="auth-form" onSubmit={handleSubmit}>
         <label>
-          Email
+          <span>Email</span>
           <input
             type="email"
             value={email}
@@ -38,10 +46,8 @@ function SignInForm() {
             required
           />
         </label>
-      </div>
-      <div>
         <label>
-          Password
+          <span>Password</span>
           <input
             type="password"
             value={password}
@@ -50,12 +56,15 @@ function SignInForm() {
             required
           />
         </label>
-      </div>
-      <button type="submit" disabled={isSubmitting}>
+        <button className="auth-submit" type="submit" disabled={isSubmitting}>
         {isSubmitting ? 'Signing in…' : 'Sign in'}
-      </button>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-    </form>
+        <span aria-hidden="true">→</span>
+        </button>
+        {error && <p className="form-error" role="alert">{error}</p>}
+        </form>
+      </section>
+      <p className="auth-footnote tagline">Built for Tiff. Built for 528.</p>
+    </main>
   );
 }
 
@@ -73,7 +82,7 @@ export function AuthGate({ children }) {
     return unsubscribe;
   }, []);
 
-  if (user === undefined) return <p>Loading…</p>;
+  if (user === undefined) return <main className="auth-page auth-loading"><span className="loading-spinner" /><p>Loading…</p></main>;
   if (user === null) return <SignInForm />;
   return children;
 }

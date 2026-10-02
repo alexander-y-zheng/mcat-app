@@ -23,11 +23,12 @@ export function ImportButton({ onImported }) {
   }
 
   return (
-    <div>
+    <div className="import-control">
       {/* Native file inputs can't be styled directly, so the common trick is to hide the
           input itself and let a <label> (which text/clicks forward to its input) act as
           the visible button instead. */}
-      <label>
+      <label className={`import-button${isLoading ? ' is-loading' : ''}`}>
+        <span className="import-button-icon" aria-hidden="true">＋</span>
         {isLoading ? 'Importing…' : 'Import .apkg'}
         <input
           type="file"
@@ -37,7 +38,7 @@ export function ImportButton({ onImported }) {
           style={{ display: 'none' }}
         />
       </label>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p className="form-error" role="alert">{error}</p>}
     </div>
   );
 }

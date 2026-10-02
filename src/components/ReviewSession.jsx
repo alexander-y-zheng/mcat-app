@@ -70,9 +70,9 @@ export function ReviewSession() {
     setIndex((i) => i + 1);
   }
 
-  if (queue === null) return <p>Loading…</p>;
-  if (queue.length === 0) return <p>No cards due. Nice work!</p>;
-  if (index >= queue.length) return <p>Session complete!</p>;
+  if (queue === null) return <div className="session-state" role="status"><span className="loading-spinner" />Loading…</div>;
+  if (queue.length === 0) return <div className="session-state is-complete"><span className="state-symbol">✓</span><p>No cards due. Nice work!</p></div>;
+  if (index >= queue.length) return <div className="session-state is-complete"><span className="state-symbol">✓</span><p>Session complete!</p></div>;
 
   const { card, note } = queue[index];
 
@@ -80,6 +80,8 @@ export function ReviewSession() {
     <ReviewSessionActive
       card={card}
       note={note}
+      index={index}
+      queueLength={queue.length}
       showAnswer={showAnswer}
       setShowAnswer={setShowAnswer}
       handleRate={handleRate}
@@ -89,7 +91,7 @@ export function ReviewSession() {
 
 // Keeps useKeybindings scoped to the active review screen only, so it isn't
 // registered during loading/empty/complete states above.
-function ReviewSessionActive({ card, note, showAnswer, setShowAnswer, handleRate }) {
+function ReviewSessionActive({ card, note, index, queueLength, showAnswer, setShowAnswer, handleRate }) {
   const onShowAnswer = () => setShowAnswer(true);
 
   useKeybindings({
@@ -100,13 +102,25 @@ function ReviewSessionActive({ card, note, showAnswer, setShowAnswer, handleRate
   // Passing the same onShowAnswer/handleRate used for keybindings down to ReviewCard's
   // on-screen buttons, so a click and the matching keypress trigger the exact same handler.
   return (
-    <ReviewCard
-      note={note}
-      qfmt={card.qfmt}
-      afmt={card.afmt}
-      showAnswer={showAnswer}
-      onShowAnswer={onShowAnswer}
-      onRate={handleRate}
-    />
+    <section className="review-session" aria-label="Review session">
+      <div className="review-session-heading">
+        <div>
+          <p className="eyebrow">IN PROGRESS</p>
+          <h2>Review session</h2>
+        </div>
+        <span className="review-progress">{String(index + 1).padStart(2, '0')} <span>/ {String(queueLength).padStart(2, '0')}</span></span>
+      </div>
+      <div className="progress-track" aria-hidden="true">
+        <span style={{ width: `${(index / queueLength) * 100}%` }} />
+      </div>
+      <ReviewCard
+        note={note}
+        qfmt={card.qfmt}
+        afmt={card.afmt}
+        showAnswer={showAnswer}
+        onShowAnswer={onShowAnswer}
+        onRate={handleRate}
+      />
+    </section>
   );
 }

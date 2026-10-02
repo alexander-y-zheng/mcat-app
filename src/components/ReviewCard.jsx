@@ -30,23 +30,35 @@ export function ReviewCard({ note, qfmt, afmt, showAnswer, onShowAnswer, onRate 
   // own deck), but worth knowing: any HTML/script embedded in an .apkg would run as-is.
   if (!showAnswer) {
     return (
-      <div>
-        <div dangerouslySetInnerHTML={{ __html: front }} />
-        <button onClick={onShowAnswer}>Show Answer (Space)</button>
-      </div>
+      <article className="review-card is-question">
+        <div className="review-card-meta">
+          <span className="review-card-label">QUESTION</span>
+          <span className="review-card-index" aria-hidden="true">01</span>
+        </div>
+        <div className="review-card-content" dangerouslySetInnerHTML={{ __html: front }} />
+        <div className="review-actions">
+          <button className="show-answer-button" onClick={onShowAnswer}>
+            Show Answer <kbd>Space</kbd>
+          </button>
+        </div>
+      </article>
     );
   }
 
   const answer = renderTemplate(afmt, note.fields, front);
   return (
-    <div>
-      <div dangerouslySetInnerHTML={{ __html: answer }} />
-      <div>
-        <button onClick={() => onRate('again')}>Again (1)</button>
-        <button onClick={() => onRate('hard')}>Hard (2)</button>
-        <button onClick={() => onRate('good')}>Good (3)</button>
-        <button onClick={() => onRate('easy')}>Easy (4)</button>
+    <article className="review-card is-answer">
+      <div className="review-card-meta">
+        <span className="review-card-label">ANSWER</span>
+        <span className="review-card-index" aria-hidden="true">02</span>
       </div>
-    </div>
+      <div className="review-card-content" dangerouslySetInnerHTML={{ __html: answer }} />
+      <div className="review-actions rating-actions">
+        <button className="rating-button rating-again" onClick={() => onRate('again')}>Again <kbd>1</kbd></button>
+        <button className="rating-button rating-hard" onClick={() => onRate('hard')}>Hard <kbd>2</kbd></button>
+        <button className="rating-button rating-good" onClick={() => onRate('good')}>Good <kbd>3</kbd></button>
+        <button className="rating-button rating-easy" onClick={() => onRate('easy')}>Easy <kbd>4</kbd></button>
+      </div>
+    </article>
   );
 }

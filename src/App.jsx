@@ -44,9 +44,39 @@ function App() {
   }, [])
 
   return (
-    <div className="App">
-      <ImportButton onImported={handleImported} />
-      {hasDeck && <ReviewSession key={importVersion} />}
+    <div className="app-shell">
+      <header className="topbar">
+        <div className="brand">
+          <span className="brand-mark" aria-hidden="true">M</span>
+          <span className="brand-name">MCAT Review</span>
+        </div>
+        <span className="topbar-note">PERSONAL STUDY SPACE</span>
+      </header>
+
+      <main className="workspace">
+        <section className="welcome-block">
+          <p className="eyebrow">YOUR STUDY DESK</p>
+          <h1>Make room for what you know.</h1>
+          <p className="welcome-copy">A quieter place to focus on the next question.</p>
+        </section>
+
+        <section className="import-panel" aria-label="Deck library">
+          <div className="import-copy">
+            <p className="eyebrow">DECK LIBRARY</p>
+            <h2>Bring in a deck</h2>
+            <p>Keep your study material close at hand.</p>
+          </div>
+          <ImportButton onImported={handleImported} />
+        </section>
+
+        {hasDeck && <ReviewSession key={importVersion} />}
+      </main>
+
+      <footer className="app-footer">
+        <span>MCAT REVIEW</span>
+        <span className="footer-mark" aria-hidden="true">✳</span>
+        <span className="tagline">Built for Tiff. Built for 528.</span>
+      </footer>
     </div>
   )
 }
