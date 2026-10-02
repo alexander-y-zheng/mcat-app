@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Miscellaneous
+CLAUDE.md
+test/
+
+# Environment variables
+.env.development
+.env.production
