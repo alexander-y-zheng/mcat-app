@@ -1,0 +1,9 @@
+{
+  "projects": {
+    "default": "mcat-app-dev",
+    "prod": "mcat-app-prod",
+    "dev": "mcat-app-dev"
+  },
+  "targets": {},
+  "etags": {}
+}

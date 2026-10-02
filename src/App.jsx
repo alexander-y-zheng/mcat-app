@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import './App.css'
+import { collection, query, limit, getDocs } from 'firebase/firestore'
 import { ImportButton } from './components/ImportButton'
 import { ReviewSession } from './components/ReviewSession'
-import { dbPromise } from './lib/db'
+import { db, auth } from './lib/firebase'
 
 function App() {
   const [hasDeck, setHasDeck] = useState(false)
@@ -13,9 +14,12 @@ function App() {
   const [importVersion, setImportVersion] = useState(0)
 
   async function checkForDeck() {
-    const db = await dbPromise
-    const count = await db.count('cards')
-    setHasDeck(count > 0)
+    const uid = auth.currentUser.uid
+    // We only need to know whether *any* card exists, not how many — limit(1) keeps this
+    // cheap (one document read) regardless of how large the deck ends up being.
+    const cardsQuery = query(collection(db, 'users', uid, 'cards'), limit(1))
+    const snapshot = await getDocs(cardsQuery)
+    setHasDeck(!snapshot.empty)
   }
 
   function handleImported() {
@@ -23,17 +27,17 @@ function App() {
     setImportVersion((v) => v + 1)
   }
 
-  // This duplicates checkForDeck's two lines rather than calling it directly. React's linter
+  // This duplicates checkForDeck's logic rather than calling it directly. React's linter
   // only considers a state update "traceable" (and therefore safe) when it happens lexically
   // inside the effect itself — calling out to an external function that happens to setState
   // gets flagged as a possible cause of extra re-renders, even though it's fine here.
   useEffect(() => {
     let cancelled = false
-    dbPromise
-      .then((db) => db.count('cards'))
-      .then((count) => {
-        if (!cancelled) setHasDeck(count > 0)
-      })
+    const uid = auth.currentUser.uid
+    const cardsQuery = query(collection(db, 'users', uid, 'cards'), limit(1))
+    getDocs(cardsQuery).then((snapshot) => {
+      if (!cancelled) setHasDeck(!snapshot.empty)
+    })
     return () => {
       cancelled = true
     }

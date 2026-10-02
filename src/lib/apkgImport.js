@@ -1,6 +1,7 @@
 import initSqlJs from 'sql.js';
 import JSZip from 'jszip'; // npm install jszip
-import { dbPromise } from './db';
+import { doc, writeBatch } from 'firebase/firestore';
+import { db, auth } from './firebase';
 
 // sql.js returns { columns: [...], values: [[...], [...]] } per query.
 // This turns that into an array of plain objects, one per row.
@@ -113,15 +114,39 @@ export async function importApkg(file) {
     };
   });
 
-  const db = await dbPromise;
-  const tx = db.transaction(['notes', 'cards'], 'readwrite');
-  for (const note of notes) {
-    tx.objectStore('notes').put(note);
+  const uid = auth.currentUser.uid;
+
+  // Everything is scoped under users/{uid}/... so each signed-in user only ever reads/writes
+  // their own data (enforced server-side by Firestore security rules, not just this code).
+  // Anki's ids are numbers, but Firestore document ids must be strings, hence String(...).
+  const noteDocs = notes.map((note) => ({
+    ref: doc(db, 'users', uid, 'notes', String(note.id)),
+    data: note,
+  }));
+  const cardDocs = cards.map((card) => ({
+    ref: doc(db, 'users', uid, 'cards', String(card.id)),
+    data: card,
+  }));
+  const allDocs = [...noteDocs, ...cardDocs];
+
+  // A writeBatch tops out at 500 operations, so a multi-thousand-card deck has to be split
+  // into several batches. 400 leaves a bit of headroom under that hard limit.
+  //
+  // These batches are committed one at a time (awaited in sequence), not fired off in
+  // parallel. That's deliberate, not an oversight: Firestore ramps up how many writes/second
+  // it'll sustain against a *brand-new* collection, starting conservative and only scaling up
+  // over time. Committing dozens of 400-op batches all at once blows past that ramp-up limit,
+  // which triggers "resource-exhausted" errors and the SDK's own backoff-and-retry — making
+  // the import take *longer* than just committing batches one after another, not shorter.
+  const CHUNK_SIZE = 400;
+  for (let i = 0; i < allDocs.length; i += CHUNK_SIZE) {
+    const chunk = allDocs.slice(i, i + CHUNK_SIZE);
+    const batch = writeBatch(db);
+    for (const { ref, data } of chunk) {
+      batch.set(ref, data);
+    }
+    await batch.commit();
   }
-  for (const card of cards) {
-    tx.objectStore('cards').put(card);
-  }
-  await tx.done;
 
   // media: zip also contains a "media" file (JSON map) + numbered media files —
   // fine to skip tonight if her test deck has no images; handle before showing her anything with pictures
