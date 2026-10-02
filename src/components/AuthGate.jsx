@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
 // Firebase's own sign-in form, not a custom one: this is a single-friend app, so there's no
@@ -84,5 +84,16 @@ export function AuthGate({ children }) {
 
   if (user === undefined) return <main className="auth-page auth-loading"><span className="loading-spinner" /><p>Loading…</p></main>;
   if (user === null) return <SignInForm />;
-  return children;
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => signOut(auth)}
+        style={{ position: 'fixed', top: 8, right: 8, zIndex: 1000 }}
+      >
+        Sign out
+      </button>
+      {children}
+    </>
+  );
 }

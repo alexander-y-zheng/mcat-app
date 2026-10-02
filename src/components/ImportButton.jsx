@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { importApkg } from '../lib/apkgImport';
+import { auth } from '../lib/firebase';
 
 export function ImportButton({ onImported }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,7 +16,10 @@ export function ImportButton({ onImported }) {
       await importApkg(file);
       onImported?.();
     } catch (err) {
-      setError(err.message);
+      console.error('Import failed:', err);
+      const project = import.meta.env.VITE_FIREBASE_PROJECT_ID;
+      const uid = auth.currentUser?.uid ?? 'not signed in';
+      setError(`${err.code ? `[${err.code}] ` : ''}${err.message} (project: ${project}, uid: ${uid})`);
     } finally {
       setIsLoading(false);
       e.target.value = ''; // allow re-selecting the same file later
