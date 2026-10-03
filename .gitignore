@@ -30,6 +30,7 @@ test/
 .claude/
 .agents/
 skills-lock.json
+todo.md
 
 # Environment variables
 .env.development
